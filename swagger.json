@@ -1,0 +1,993 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Yettel Task API",
+    "version": "1.0.0",
+    "description": "REST API za upravljanje taskovima sa role-based access control (Basic & Admin korisnici). API implementira JWT autentikaciju, paginaciju, sortiranje i validaciju podataka.",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Health check endpoint"
+    },
+    {
+      "name": "Auth",
+      "description": "Autentikacija - Registracija i Login (javni endpoint-i)"
+    },
+    {
+      "name": "Tasks",
+      "description": "Task management - CRUD operacije (zaštićeno JWT-om)"
+    },
+    {
+      "name": "Users",
+      "description": "User management - CRUD operacije (zaštićeno JWT-om)"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health Check",
+        "description": "Provera da li server radi",
+        "responses": {
+          "200": {
+            "description": "Server je aktivan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-11-22T12:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Registracija novog korisnika",
+        "description": "Kreira novog korisnika (basic ili admin). Email i username moraju biti unique.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["firstName", "lastName", "username", "email", "password"],
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "example": "Marko",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Markovic",
+                    "minLength": 1,
+                    "maxLength": 50
+                  },
+                  "username": {
+                    "type": "string",
+                    "example": "marko123",
+                    "minLength": 1,
+                    "maxLength": 35
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "marko@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "marko123",
+                    "minLength": 6
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["basic", "admin"],
+                    "default": "basic",
+                    "example": "basic"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Korisnik uspešno registrovan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User registered successfully."
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validacioni error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingFields": {
+                    "value": {
+                      "error": "All fields are required."
+                    }
+                  },
+                  "invalidEmail": {
+                    "value": {
+                      "error": "Invalid email format."
+                    }
+                  },
+                  "shortPassword": {
+                    "value": {
+                      "error": "Password must be at least 6 characters long."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email ili username već postoji",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "duplicateEmail": {
+                    "value": {
+                      "error": "Email already exists."
+                    }
+                  },
+                  "duplicateUsername": {
+                    "value": {
+                      "error": "Username already exists."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login",
+        "description": "Autentikacija korisnika. Vraća JWT token koji se koristi za zaštićene endpoint-e.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "marko@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "marko123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login uspešan - vraća JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Login successful."
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImJhc2ljIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjE3MDAwODY0MDB9.xxxxxx"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nedostaju email ili password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Email and password are required."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Pogrešan email ili password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Invalid email or password."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks": {
+      "post": {
+        "tags": ["Tasks"],
+        "summary": "Kreiranje novog taska (samo BASIC user)",
+        "description": "Basic user može kreirati taskove. Admin NE MOŽE kreirati taskove.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["body"],
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "example": "Kupiti hleb i mleko",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task uspešno kreiran",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Task created successfully."
+                    },
+                    "task": {
+                      "$ref": "#/components/schemas/Task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body je prazan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Task body is required."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Admin pokušava da kreira task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Admins cannot create tasks."
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Tasks"],
+        "summary": "Listanje taskova sa paginacijom i sortiranjem",
+        "description": "Basic user vidi samo svoje taskove. Admin vidi SVE taskove.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Broj stranice (default: 1)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Broj taskova po stranici (default: 10, max: 100)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "example": 10
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Redosled sortiranja: DESC (najnoviji first) ili ASC (najstariji first)",
+            "schema": {
+              "type": "string",
+              "enum": ["ASC", "DESC"],
+              "default": "DESC",
+              "example": "DESC"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista taskova sa paginacijom",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tasks": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Task"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "currentPage": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 5
+                        },
+                        "totalTasks": {
+                          "type": "integer",
+                          "example": 47
+                        },
+                        "tasksPerPage": {
+                          "type": "integer",
+                          "example": 10
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nevažeći query parametri",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidPage": {
+                    "value": {
+                      "error": "Page must be greater than 0."
+                    }
+                  },
+                  "invalidLimit": {
+                    "value": {
+                      "error": "Limit must be between 1 and 100."
+                    }
+                  },
+                  "invalidSort": {
+                    "value": {
+                      "error": "Sort order must be ASC or DESC."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/api/tasks/{id}": {
+      "get": {
+        "tags": ["Tasks"],
+        "summary": "Dobijanje pojedinačnog taska",
+        "description": "Basic user može videti samo svoje taskove. Admin može videti sve taskove.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Task ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task uspešno pronađen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task": {
+                      "$ref": "#/components/schemas/Task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Basic user pokušava da vidi tuđ task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Access forbidden. You can only view your own tasks."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task nije pronađen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Task not found."
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Tasks"],
+        "summary": "Update taska",
+        "description": "Basic user može update-ovati samo svoje taskove. Admin može update-ovati SVE taskove.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Task ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["body"],
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "example": "UPDATED - Kupiti hleb, mleko i jaja",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task uspešno ažuriran",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Task updated successfully."
+                    },
+                    "task": {
+                      "$ref": "#/components/schemas/Task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body je prazan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Task body is required."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Basic user pokušava da update-uje tuđ task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Access forbidden. You can only update your own tasks."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task nije pronađen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Task not found."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Dobijanje user podataka",
+        "description": "Basic user može videti samo svoje podatke. Admin može videti sve user-e.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User podatci uspešno pronađeni",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Basic user pokušava da vidi druge user-e",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Access forbidden. You can only view your own data."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User nije pronađen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "User not found."
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user podataka",
+        "description": "Basic user može update-ovati samo svoje podatke. Admin može update-ovati SVE user-e. Podržava parcijalni update (nije obavezno poslati sva polja).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "example": "Marko",
+                    "maxLength": 40
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Markovic UPDATED",
+                    "maxLength": 50
+                  },
+                  "username": {
+                    "type": "string",
+                    "example": "marko_new",
+                    "maxLength": 35
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "marko_new@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User uspešno ažuriran",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User updated successfully."
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validacioni error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "noFields": {
+                    "value": {
+                      "error": "At least one field must be provided for update."
+                    }
+                  },
+                  "invalidEmail": {
+                    "value": {
+                      "error": "Invalid email format."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Basic user pokušava da update-uje druge user-e",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Access forbidden. You can only update your own data."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User nije pronađen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "User not found."
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email ili username već postoji",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "duplicateEmail": {
+                    "value": {
+                      "error": "Email already exists."
+                    }
+                  },
+                  "duplicateUsername": {
+                    "value": {
+                      "error": "Username already exists."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token dobijen nakon uspešnog login-a. Koristi format: Bearer <token>"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Marko"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Markovic"
+          },
+          "username": {
+            "type": "string",
+            "example": "marko123"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "marko@example.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["basic", "admin"],
+            "example": "basic"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-22T12:00:00.000Z"
+          }
+        },
+        "description": "User objekat (bez password polja iz bezbednosnih razloga)"
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "body": {
+            "type": "string",
+            "example": "Kupiti hleb i mleko"
+          },
+          "userId": {
+            "type": "integer",
+            "example": 1
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Marko"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Markovic"
+          },
+          "username": {
+            "type": "string",
+            "example": "marko123"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-22T12:00:00.000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-22T12:00:00.000Z"
+          }
+        },
+        "description": "Task objekat sa informacijama o user-u koji ga je kreirao"
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Error message"
+          }
+        },
+        "description": "Standardni error response"
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "JWT token je nevažeći, expirovan ili nedostaje",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "noToken": {
+                "summary": "Token nedostaje",
+                "value": {
+                  "error": "Access denied. No token provided."
+                }
+              },
+              "invalidToken": {
+                "summary": "Nevažeći token",
+                "value": {
+                  "error": "Invalid token."
+                }
+              },
+              "expiredToken": {
+                "summary": "Token expirovan",
+                "value": {
+                  "error": "Token expired."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1158 @@
+{
+	"info": {
+		"_postman_id": "70d42e2e-3853-42e6-ae97-dcb0b977cf1e",
+		"name": "Yettel Task API",
+		"description": "Complete REST API testing collection for Task Management System with User Roles (Basic & Admin)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "33183170"
+	},
+	"item": [
+		{
+			"name": "1. Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/health"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Auth (Register & Login)",
+			"item": [
+				{
+					"name": "Register Basic User #1 (Marko)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Marko\",\n    \"lastName\": \"Markovic\",\n    \"username\": \"marko123\",\n    \"email\": \"marko@example.com\",\n    \"password\": \"marko123\",\n    \"role\": \"basic\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Register Basic User #2 (Petar)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Petar\",\n    \"lastName\": \"Petrovic\",\n    \"username\": \"petar456\",\n    \"email\": \"petar@example.com\",\n    \"password\": \"petar456\",\n    \"role\": \"basic\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Register Admin User (Ana)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Ana\",\n    \"lastName\": \"Adminovic\",\n    \"username\": \"ana_admin\",\n    \"email\": \"ana@example.com\",\n    \"password\": \"admin123\",\n    \"role\": \"admin\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Duplicate Email (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"username\": \"test_unique\",\n    \"email\": \"marko@example.com\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Duplicate Username (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"username\": \"marko123\",\n    \"email\": \"unique@example.com\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Missing Fields (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Test\",\n    \"email\": \"test@example.com\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Invalid Email (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"username\": \"testuser\",\n    \"email\": \"invalid-email\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Short Password (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"123\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Login Basic User (Marko)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"marko@example.com\",\n    \"password\": \"marko123\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "Login Admin User (Ana)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ana@example.com\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Wrong Password (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"marko@example.com\",\n    \"password\": \"wrongpassword\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Non-existent Email (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"nepostoji@example.com\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Missing Fields (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"marko@example.com\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/login"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Tasks - Basic User",
+			"item": [
+				{
+					"name": "Create Task #1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Kupiti hleb i mleko\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task #2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Završiti projekat do kraja nedelje\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task #3",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Pozvati zubara za pregled\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task #4",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Naučiti Express.js framework\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task #5",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Otići u teretanu\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task - Empty Body (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task - No Token (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Test task\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task - Invalid Token (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer invalid_token_12345"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Test task\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Tasks - Default",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks - Page 1, Limit 2, DESC",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks?page=1&limit=2&sort=DESC",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "2"
+								},
+								{
+									"key": "sort",
+									"value": "DESC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks - Page 2, Limit 2",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks?page=2&limit=2&sort=DESC",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								},
+								{
+									"key": "limit",
+									"value": "2"
+								},
+								{
+									"key": "sort",
+									"value": "DESC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks - Sort ASC (Oldest First)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks?sort=ASC",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "ASC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks - Invalid Page (FAIL)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks?page=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks - Invalid Limit (FAIL)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks?limit=200",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "200"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks - Invalid Sort (FAIL)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks?sort=INVALID",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "INVALID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Task - Own Task",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/tasks/{{task_id_1}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Task - Non-existent (FAIL)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/tasks/99999"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task - Own Task",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"UPDATED - Kupiti hleb, mleko i jaja\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks/{{task_id_1}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task - Empty Body (FAIL)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks/{{task_id_1}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Tasks - Admin",
+			"item": [
+				{
+					"name": "Create Task - Admin (FAIL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Admin pokušava da kreira task\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Tasks - Admin (See All)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/tasks"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks - Admin with Pagination",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks?page=1&limit=3&sort=DESC",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "3"
+								},
+								{
+									"key": "sort",
+									"value": "DESC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Task - Admin (Other User's Task)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/tasks/{{task_id_1}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task - Admin (Other User's Task)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Admin je promenio task\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks/{{task_id_2}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Users - Basic User",
+			"item": [
+				{
+					"name": "Get Own User Data",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/users/{{basic_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Other User Data (FAIL)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/users/{{admin_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Own User Data",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Marko\",\n    \"lastName\": \"Markovic UPDATED\",\n    \"username\": \"marko123_new\",\n    \"email\": \"marko_new@example.com\"\n}"
+						},
+						"url": "{{base_url}}/api/users/{{basic_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Own User - Partial",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Marko NOVO IME\"\n}"
+						},
+						"url": "{{base_url}}/api/users/{{basic_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Own User - Duplicate Email (FAIL)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ana@example.com\"\n}"
+						},
+						"url": "{{base_url}}/api/users/{{basic_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Own User - Duplicate Username (FAIL)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"ana_admin\"\n}"
+						},
+						"url": "{{base_url}}/api/users/{{basic_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Own User - Invalid Email (FAIL)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"invalid-email-format\"\n}"
+						},
+						"url": "{{base_url}}/api/users/{{basic_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Own User - No Fields (FAIL)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": "{{base_url}}/api/users/{{basic_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Other User Data (FAIL)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{basic_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Pokušavam da izmenim admina\"\n}"
+						},
+						"url": "{{base_url}}/api/users/{{admin_user_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Users - Admin",
+			"item": [
+				{
+					"name": "Get Own User Data - Admin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/users/{{admin_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Other User Data - Admin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/users/{{basic_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Other User Data - Admin",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Marko\",\n    \"lastName\": \"Admin promenio prezime\",\n    \"username\": \"marko_admin_changed\",\n    \"email\": \"marko_admin@example.com\"\n}"
+						},
+						"url": "{{base_url}}/api/users/{{basic_user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Own User Data - Admin",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Ana\",\n    \"lastName\": \"Super Admin\",\n    \"username\": \"ana_super_admin\",\n    \"email\": \"ana_super@example.com\"\n}"
+						},
+						"url": "{{base_url}}/api/users/{{admin_user_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Edge Cases",
+			"item": [
+				{
+					"name": "Get Non-existent User (FAIL)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": "{{base_url}}/api/users/99999"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Non-existent User (FAIL)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Test\"\n}"
+						},
+						"url": "{{base_url}}/api/users/99999"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Non-existent Task (FAIL)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Test\"\n}"
+						},
+						"url": "{{base_url}}/api/tasks/99999"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
